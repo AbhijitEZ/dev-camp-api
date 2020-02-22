@@ -16,8 +16,10 @@ connectDB();
 //  App Instance
 const app = express();
 
-//  Logger Middleware
-app.use(morgan('tiny'));
+if (process.env.NODE_ENV === 'development') {
+  //  Logger Middleware
+  app.use(morgan('tiny'));
+}
 
 //  Routes
 app.use('/api/v1/bootcamps', bootcamps);
