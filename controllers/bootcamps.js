@@ -1,9 +1,19 @@
+const isEmpty = require('lodash.isempty');
+const Bootcamp = require('../models/Bootcamp');
+const ErrorResponse = require('../utils/errorResponse');
 /* 
   @desc     -> Get all bootcamps
   @access   -> Public 
 */
-exports.getBootcamps = (req, res, next) => {
-  res.status(200).json({ success: true, msg: 'Get all' });
+exports.getBootcamps = async (req, res, next) => {
+  try {
+    const bootcamps = await Bootcamp.find();
+    res
+      .status(200)
+      .json({ success: true, count: bootcamps.length, data: bootcamps });
+  } catch (error) {
+    next(error);
+  }
 };
 
 /* 
@@ -11,16 +21,34 @@ exports.getBootcamps = (req, res, next) => {
   @access   -> Public
   @params   -> Id of the bootcamp 
 */
-exports.getBootcamp = (req, res, next) => {
-  res.status(200).json({ success: true, msg: `Get ${req.params.id}` });
+exports.getBootcamp = async (req, res, next) => {
+  try {
+    const bootcamp = await Bootcamp.findById(req.params.id);
+    if (isEmpty(bootcamp)) {
+      return next(
+        new ErrorResponse(`Bootcamp not found for id ${req.params.id}`, 404)
+      );
+    }
+    res.status(200).json({ success: true, data: bootcamp });
+  } catch (error) {
+    next(error);
+  }
 };
 
 /* 
   @desc     -> Create new bootcamp
   @access   -> Private
 */
-exports.createBootcamp = (req, res, next) => {
-  res.status(200).json({ success: true, msg: 'Post Create' });
+exports.createBootcamp = async (req, res, next) => {
+  try {
+    const bootcamp = await Bootcamp.create(req.body);
+    res.status(201).json({
+      success: true,
+      data: bootcamp
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 /* 
@@ -28,8 +56,22 @@ exports.createBootcamp = (req, res, next) => {
   @access   -> Private
   @params   -> Id of the bootcamp 
 */
-exports.updateBootcamp = (req, res, next) => {
-  res.status(200).json({ success: true, msg: `Put ${req.params.id} Update` });
+exports.updateBootcamp = async (req, res, next) => {
+  try {
+    const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
+    if (isEmpty(bootcamp)) {
+      new ErrorResponse(`Bootcamp not found for id ${req.params.id}`, 404);
+    }
+    res.status(200).json({
+      success: true,
+      data: bootcamp
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 /* 
@@ -37,8 +79,17 @@ exports.updateBootcamp = (req, res, next) => {
   @access   -> Private
   @params   -> Id of the bootcamp 
 */
-exports.deleteBootcamp = (req, res, next) => {
-  res
-    .status(200)
-    .json({ success: true, msg: `Delete ${req.params.id} Delete One` });
+exports.deleteBootcamp = async (req, res, next) => {
+  try {
+    const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
+    if (isEmpty(bootcamp)) {
+      new ErrorResponse(`Bootcamp not found for id ${req.params.id}`, 404);
+    }
+    res.status(200).json({
+      success: true,
+      data: {}
+    });
+  } catch (error) {
+    next(error);
+  }
 };
